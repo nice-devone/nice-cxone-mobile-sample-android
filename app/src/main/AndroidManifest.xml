@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.customerdynamics.sdk">
+    package="com.nice.cxonechat.sample">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,27 +13,41 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".LoginActivity"
-            android:exported="true"
-            android:configChanges="keyboard|keyboardHidden|orientation">
+            android:name=".VideoPreviewActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboardHidden"/>
+        <activity
+            android:name=".ImagePreviewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ConfigurationActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name="com.amazon.identity.auth.device.workflow.WorkflowActivity"
-            android:theme="@android:style/Theme.NoDisplay"
+        <activity
+            android:name=".LoginActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation"
+            android:exported="true" />
+        <activity
+            android:name="com.amazon.identity.auth.device.workflow.WorkflowActivity"
             android:allowTaskReparenting="true"
+            android:exported="true"
             android:launchMode="singleTask"
-            android:exported="true">
+            android:theme="@android:style/Theme.NoDisplay">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <!-- android:host must use the full package name found in Manifest General Attributes -->
-                <data android:host="com.customerdynamics.sdk" android:scheme="amzn"/>
+                <data
+                    android:host="com.nice.cxonechat.sample"
+                    android:scheme="amzn" />
             </intent-filter>
         </activity>
 
@@ -46,7 +60,7 @@
             android:exported="true">
             <intent-filter>
                 <data
-                    android:host="profile"
+                    android:host="deep-link-view"
                     android:scheme="incontact" />
 
                 <action android:name="android.intent.action.VIEW" />
@@ -56,13 +70,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Home"
-            android:exported="true">
-        </activity>
-
+            android:name=".HomeActivity"
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
-            android:exported="true"></activity>
+            android:exported="false" />
 
         <service
             android:name=".PushListenerService"

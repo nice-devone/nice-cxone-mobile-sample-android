@@ -29,6 +29,49 @@
             {
               "client_id": "394338712271-8juk46h10s4i4i5rdadg1mm6a0qceel4.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "394338712271-btn2nrj7303cal6e7l8uskedn4rnstfg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.test.test"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:394338712271:android:f34159e0db50d68db395ba",
+        "android_client_info": {
+          "package_name": "com.nice.cxonechat.sample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "394338712271-8juk46h10s4i4i5rdadg1mm6a0qceel4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDh76lYhOEGTFyCMIfwAQagTXxAEeyKrM0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "394338712271-8juk46h10s4i4i5rdadg1mm6a0qceel4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "394338712271-btn2nrj7303cal6e7l8uskedn4rnstfg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.test.test"
+              }
             }
           ]
         }

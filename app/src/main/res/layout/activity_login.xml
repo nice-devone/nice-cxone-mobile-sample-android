@@ -18,14 +18,16 @@
             android:layout_height="wrap_content"
             android:text="@string/continue_as_guest"
             android:layout_marginBottom="20dp"
-            android:textAllCaps="false"/>
+            android:textAllCaps="false"
+            android:visibility="gone"/>
 
         <ImageButton
             android:id="@+id/login_with_amazon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="0dp"
-            android:src="@drawable/btnlwa_gold_loginwithamazon" />
+            android:src="@drawable/btnlwa_gold_loginwithamazon"
+            android:visibility="gone"/>
     </LinearLayout>
 
 </LinearLayout>

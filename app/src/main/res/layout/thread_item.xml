@@ -4,7 +4,6 @@
     android:id="@+id/thread_item_card_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="20dp"
     android:animateLayoutChanges="true"
     android:clickable="true"
     android:focusable="true"
@@ -19,6 +18,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="10dp"
             android:orientation="horizontal">
 
             <ImageView
@@ -66,11 +66,6 @@
                 android:src="@drawable/ic_baseline_chevron_right_24"/>
 
         </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/gray_light" />
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

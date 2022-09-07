@@ -16,4 +16,15 @@
     <string name="continue_as_guest">Continue as guest</string>
     <string name="new_message_received">New message received</string>
     <string name="socket_disconnected">Socket disconnected</string>
+    <string name="configuration">Configuration</string>
+    <string name="use_a_custom_configuration">Use a custom configuration</string>
+    <string name="continue_text">Continue</string>
+    <string name="environment">Environment</string>
+    <string name="brand_id">Brand ID</string>
+    <string name="channel_id">Channel ID</string>
+    <string name="use_a_default_configuration">Use a default configuration</string>
+    <string name="select_valid_configuration">You must select a valid configuration</string>
+    <string name="configuration_error">Something went wrong and we couldn\'t get the configuration for that channel. Please check your selection and try again.</string>
+    <string name="deep_link_description">This is an example of a deep link! You can link to any other view in your app by sending a deep link plugin message using the CXone Chat SDK.</string>
+    <string name="deep_link">Deep Link</string>
 </resources>
