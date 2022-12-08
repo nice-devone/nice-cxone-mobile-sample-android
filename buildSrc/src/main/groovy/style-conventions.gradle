@@ -1,0 +1,13 @@
+plugins {
+    id "io.gitlab.arturbosch.detekt"
+}
+
+detekt {
+    config = rootProject.files("config/detekt/detekt.yml")
+    baseline = rootProject.file("config/detekt/detekt-baseline.xml")
+    ignoredBuildTypes = ["release"]
+}
+
+dependencies {
+    detektPlugins "io.gitlab.arturbosch.detekt:detekt-formatting:1.21.0"
+}

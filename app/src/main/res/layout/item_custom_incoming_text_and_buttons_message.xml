@@ -1,4 +1,5 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
@@ -18,6 +19,7 @@
             android:id="@+id/image_slider"
             android:layout_width="match_parent"
             android:layout_height="100dp"
+            tools:background="@tools:sample/backgrounds/scenic"
             />
 
     </LinearLayout>
@@ -29,6 +31,7 @@
         android:layout_alignEnd="@id/bubble"
         android:layout_below="@id/bubble"
         android:layout_marginStart="16dp"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        tools:text="@tools:sample/date/hhmm" />
 
 </RelativeLayout>

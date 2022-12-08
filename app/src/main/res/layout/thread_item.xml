@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/thread_item_card_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -26,7 +27,8 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginLeft="15dp"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                tools:src="@tools:sample/avatars" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -44,7 +46,8 @@
                     android:layout_marginBottom="5dp"
                     android:textColor="@color/black"
                     android:textStyle="bold"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    tools:text="@tools:sample/full_names" />
 
                 <TextView
                     android:id="@+id/thread_last_message_text_view"
@@ -54,7 +57,9 @@
                     android:layout_marginRight="10dp"
                     android:layout_marginBottom="10dp"
                     android:textColor="@color/gray"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    tools:text="@tools:sample/lorem/random"
+                    tools:maxLines="2" />
 
             </LinearLayout>
 

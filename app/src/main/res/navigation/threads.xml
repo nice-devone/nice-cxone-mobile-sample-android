@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/threads"
+    app:startDestination="@id/chatThreadsFragment">
+    <fragment
+        android:id="@+id/chatThreadsFragment"
+        android:name="com.nice.cxonechat.sample.ui.main.ChatThreadsFragment"
+        android:label="ChatThreadsFragment"
+        tools:layout="@layout/fragment_chat_threads">
+        <action
+            android:id="@+id/action_chatThreadsFragment_to_chat"
+            app:destination="@id/chat" />
+        <action
+            android:id="@+id/action_chatThreadsFragment_signOut"
+            app:destination="@id/configurationActivity"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/threads"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <include app:graph="@navigation/chat" />
+    <activity
+        android:id="@+id/configurationActivity"
+        android:name="com.nice.cxonechat.sample.ConfigurationActivity"
+        android:label="activity_configuration"
+        tools:layout="@layout/activity_configuration" />
+</navigation>

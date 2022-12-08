@@ -1,0 +1,70 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>DataClassShouldBeImmutable:SpinnerOption.kt$SpinnerOption$var id: String</ID>
+    <ID>DataClassShouldBeImmutable:SpinnerOption.kt$SpinnerOption$var name: String</ID>
+    <ID>SpacingBetweenPackageAndImports:SwipeToDeleteCallback.kt$ </ID>
+    <ID>UndocumentedPublicClass:ChatThreadFragment.kt$ChatThreadFragment : FragmentInputListenerTypingListenerSelectionListenerOnLoadMoreListenerAttachmentsListener</ID>
+    <ID>UndocumentedPublicClass:ChatThreadsFragment.kt$ChatThreadsFragment : FragmentThreadSelectedListener</ID>
+    <ID>UndocumentedPublicClass:ConfigurationActivity.kt$ConfigurationActivity : SampleAppBaseActivity</ID>
+    <ID>UndocumentedPublicClass:CustomConfigurationFragment.kt$CustomConfigurationFragment : Fragment</ID>
+    <ID>UndocumentedPublicClass:DeepLinkActivity.kt$DeepLinkActivity : AppCompatActivity</ID>
+    <ID>UndocumentedPublicClass:HomeConfigurationFragment.kt$HomeConfigurationFragment : Fragment</ID>
+    <ID>UndocumentedPublicClass:ImagePreviewActivity.kt$ImagePreviewActivity : AppCompatActivity</ID>
+    <ID>UndocumentedPublicClass:IncomingTextAndButtonsMessageViewHolder.kt$IncomingTextAndButtonsMessageViewHolder : IncomingTextMessageViewHolderEventListener</ID>
+    <ID>UndocumentedPublicClass:LoginActivity.kt$LoginActivity : AppCompatActivity</ID>
+    <ID>UndocumentedPublicClass:MainActivity.kt$MainActivity : AppCompatActivityOnMenuItemClickListener</ID>
+    <ID>UndocumentedPublicClass:Message.kt$AttachmentMessage : MessageImage</ID>
+    <ID>UndocumentedPublicClass:Message.kt$Message : IMessage</ID>
+    <ID>UndocumentedPublicClass:Message.kt$PluginMessage : MessageMessageContentType</ID>
+    <ID>UndocumentedPublicClass:Message.kt$PluginMessage$Content</ID>
+    <ID>UndocumentedPublicClass:Message.kt$TextMessage : Message</ID>
+    <ID>UndocumentedPublicClass:OutcomingTextAndButtonsMessageViewHolder.kt$OutcomingTextAndButtonsMessageViewHolder : OutcomingTextMessageViewHolder</ID>
+    <ID>UndocumentedPublicClass:PKCE.kt$PKCEConstants</ID>
+    <ID>UndocumentedPublicClass:PKCE.kt$PKCEError</ID>
+    <ID>UndocumentedPublicClass:SampleAppBaseActivity.kt$SampleAppBaseActivity : AppCompatActivity</ID>
+    <ID>UndocumentedPublicClass:SampleApplication.kt$SampleApplication : Application</ID>
+    <ID>UndocumentedPublicClass:SpinnerOption.kt$SpinnerOption : Serializable</ID>
+    <ID>UndocumentedPublicClass:SwipeToDeleteCallback.kt$SwipeToDeleteCallback : SimpleCallback</ID>
+    <ID>UndocumentedPublicClass:Thread.kt$Thread</ID>
+    <ID>UndocumentedPublicClass:ThreadAdapter.kt$ThreadAdapter : Adapter</ID>
+    <ID>UndocumentedPublicClass:ThreadAdapter.kt$ThreadAdapter$ViewHolder : ViewHolder</ID>
+    <ID>UndocumentedPublicClass:ThreadAdapter.kt$ThreadSelectedListener</ID>
+    <ID>UndocumentedPublicClass:User.kt$User : IUser</ID>
+    <ID>UndocumentedPublicClass:UserDetails.kt$UserDetails</ID>
+    <ID>UndocumentedPublicClass:VideoPreviewActivity.kt$VideoPreviewActivity : AppCompatActivity</ID>
+    <ID>UndocumentedPublicFunction:ExampleUnitTest.kt$ExampleUnitTest$@Test fun addition_isCorrect()</ID>
+    <ID>UndocumentedPublicFunction:PKCE.kt$fun generateCodeChallenge(codeVerifier: String): String</ID>
+    <ID>UndocumentedPublicFunction:PKCE.kt$fun generateCodeVerifier(length: Int = PKCEConstants.MAX_CODE_VERIFIER_LENGTH): String</ID>
+    <ID>UndocumentedPublicFunction:SampleAppBaseActivity.kt$SampleAppBaseActivity$fun initActivityToolbarWithoutBack( toolbar: Toolbar?, title: String? = "" )</ID>
+    <ID>UndocumentedPublicFunction:ThreadAdapter.kt$ThreadAdapter$fun getThreads(): MutableList&lt;Thread&gt;</ID>
+    <ID>UndocumentedPublicFunction:ThreadAdapter.kt$ThreadAdapter$fun removeAt(position: Int)</ID>
+    <ID>UndocumentedPublicFunction:ThreadAdapter.kt$ThreadAdapter$fun setThreads(options: List&lt;Thread&gt;)</ID>
+    <ID>UndocumentedPublicFunction:ThreadAdapter.kt$ThreadAdapter$fun updateThread(thread: Thread)</ID>
+    <ID>UndocumentedPublicFunction:ThreadAdapter.kt$ThreadSelectedListener$fun threadSelected(thread: Thread)</ID>
+    <ID>UndocumentedPublicProperty:Message.kt$AttachmentMessage$val mimeType = attachment.mimeType</ID>
+    <ID>UndocumentedPublicProperty:Message.kt$Message$val status: String = "Sent"</ID>
+    <ID>UndocumentedPublicProperty:Message.kt$PluginMessage$val content: Content</ID>
+    <ID>UndocumentedPublicProperty:Message.kt$PluginMessage.Content$val elements: List&lt;PluginElement&gt;</ID>
+    <ID>UndocumentedPublicProperty:Message.kt$PluginMessage.Content$val postback: String?</ID>
+    <ID>UndocumentedPublicProperty:PKCE.kt$PKCEConstants$const val BITS_IN_CHAR = 6</ID>
+    <ID>UndocumentedPublicProperty:PKCE.kt$PKCEConstants$const val BITS_IN_OCTET = 8</ID>
+    <ID>UndocumentedPublicProperty:PKCE.kt$PKCEConstants$const val MAX_CODE_VERIFIER_LENGTH = 128</ID>
+    <ID>UndocumentedPublicProperty:PKCE.kt$PKCEConstants$const val MIN_CODE_VERIFIER_LENGTH = 43</ID>
+    <ID>UndocumentedPublicProperty:SpinnerOption.kt$SpinnerOption$var id: String</ID>
+    <ID>UndocumentedPublicProperty:SpinnerOption.kt$SpinnerOption$var name: String</ID>
+    <ID>UndocumentedPublicProperty:Thread.kt$Thread$val agentImage: String = chatThread.threadAgent?.imageUrl.orEmpty()</ID>
+    <ID>UndocumentedPublicProperty:Thread.kt$Thread$val chatThread: ChatThread</ID>
+    <ID>UndocumentedPublicProperty:Thread.kt$Thread$val id: UUID = chatThread.id</ID>
+    <ID>UndocumentedPublicProperty:Thread.kt$Thread$val name: String</ID>
+    <ID>UndocumentedPublicProperty:ThreadAdapter.kt$ThreadAdapter.ViewHolder$val agentImageView: ImageView = binding.agentImageView</ID>
+    <ID>UndocumentedPublicProperty:ThreadAdapter.kt$ThreadAdapter.ViewHolder$val threadItemCardView: CardView = binding.threadItemCardView</ID>
+    <ID>UndocumentedPublicProperty:ThreadAdapter.kt$ThreadAdapter.ViewHolder$val threadLastMessageTextView: TextView = binding.threadLastMessageTextView</ID>
+    <ID>UndocumentedPublicProperty:ThreadAdapter.kt$ThreadAdapter.ViewHolder$val threadNumberTextView: TextView = binding.threadNumberTextView</ID>
+    <ID>UndocumentedPublicProperty:UserDetails.kt$UserDetails$val chatCustomFields = mapOf( "firstname" to firstName, "lastname" to lastName, ) + customFields</ID>
+    <ID>UndocumentedPublicProperty:UserDetails.kt$UserDetails$val firstName: String</ID>
+    <ID>UndocumentedPublicProperty:UserDetails.kt$UserDetails$val lastName: String</ID>
+    <ID>UndocumentedPublicProperty:UserDetails.kt$UserDetails$val threadCustomFields: Map&lt;String, String&gt; = emptyMap()</ID>
+  </CurrentIssues>
+</SmellBaseline>

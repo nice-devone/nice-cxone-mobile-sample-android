@@ -10,27 +10,41 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
-import com.nice.cxonechat.CXOneChat;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.nice.cxonechat.Chat;
+import com.nice.cxonechat.sample.domain.ChatRepository;
 
 import java.util.HashMap;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class PushListenerService extends FirebaseMessagingService {
     public static final String TAG = PushListenerService.class.getSimpleName();
-    private static final CXOneChat cxOneChat = CXOneChat.INSTANCE;
+
+    @Inject
+    ChatRepository repository;
 
     @Override
-    public void onNewToken(String token) {
+    public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
-        cxOneChat.registerDeviceToken(token);
+        Chat chat = repository.getChatInstance();
+        if (chat == null) {
+            Log.v(TAG, "No chat instance present, token not passed");
+            return;
+        }
+        chat.setDeviceToken(token);
         Log.d(TAG, "Registering push notifications token: " + token);
     }
 
     @Override
-    public void onMessageReceived(RemoteMessage remoteMessage) {
+    public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         Log.d(TAG, "Message: " + remoteMessage.getData());
         sendNotification(
