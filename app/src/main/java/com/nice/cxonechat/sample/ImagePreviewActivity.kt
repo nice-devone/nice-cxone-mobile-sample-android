@@ -2,13 +2,13 @@ package com.nice.cxonechat.sample
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.navArgs
 import com.bumptech.glide.Glide
-import com.nice.cxonechat.sample.MainActivity.Companion.IMAGE_URL
 import com.nice.cxonechat.sample.databinding.ActivityImagePreviewBinding
 
 class ImagePreviewActivity : AppCompatActivity() {
     private lateinit var binding: ActivityImagePreviewBinding
-    private val imageUrl: String? by lazy { intent.extras?.getString(IMAGE_URL) }
+    private val imageUrl: String by lazy { navArgs<ImagePreviewActivityArgs>().value.imageUrl }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

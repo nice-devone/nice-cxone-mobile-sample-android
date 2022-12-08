@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/chat"
+    app:startDestination="@id/chatThreadFragment">
+
+    <fragment
+        android:id="@+id/chatThreadFragment"
+        android:name="com.nice.cxonechat.sample.ui.main.ChatThreadFragment"
+        android:label="ChatThreadFragment"
+        tools:layout="@layout/fragment_chat_thread">
+        <action
+            android:id="@+id/action_chatThreadFragment_to_imagePreviewActivity"
+            app:destination="@id/imagePreviewActivity"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/chatThreadFragment" />
+        <action
+            android:id="@+id/action_chatThreadFragment_to_videoPreviewActivity"
+            app:destination="@id/videoPreviewActivity"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/chatThreadFragment" />
+        <action
+            android:id="@+id/action_chatThreadFragment_signOut"
+            app:destination="@id/configurationActivity"
+            app:popUpTo="@id/chat"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <activity
+        android:id="@+id/configurationActivity"
+        android:name="com.nice.cxonechat.sample.ConfigurationActivity"
+        android:label="activity_configuration"
+        tools:layout="@layout/activity_configuration" />
+    <activity
+        android:id="@+id/imagePreviewActivity"
+        android:name="com.nice.cxonechat.sample.ImagePreviewActivity"
+        android:label="activity_image_preview"
+        tools:layout="@layout/activity_image_preview">
+        <argument
+            android:name="imageUrl"
+            app:argType="string" />
+    </activity>
+    <activity
+        android:id="@+id/videoPreviewActivity"
+        android:name="com.nice.cxonechat.sample.VideoPreviewActivity"
+        android:label="activity_video_preview"
+        tools:layout="@layout/activity_video_preview">
+        <argument
+            android:name="videoUrl"
+            app:argType="string" />
+    </activity>
+</navigation>

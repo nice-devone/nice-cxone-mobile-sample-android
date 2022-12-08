@@ -27,4 +27,11 @@
     <string name="configuration_error">Something went wrong and we couldn\'t get the configuration for that channel. Please check your selection and try again.</string>
     <string name="deep_link_description">This is an example of a deep link! You can link to any other view in your app by sending a deep link plugin message using the CXone Chat SDK.</string>
     <string name="deep_link">Deep Link</string>
+    <string name="detail_hint_prefix">Enter your %1$s</string>
+    <string name="thread_topic_hint">Enter conversation topic</string>
+    <string name="email">e-mail</string>
+    <string name="change_details_label">Change custom fields</string>
+    <string name="dsc_create_thread">Create thread</string>
+    <string name="btn_label_current">Current</string>
+    <string name="btn_label_archived">Archived</string>
 </resources>

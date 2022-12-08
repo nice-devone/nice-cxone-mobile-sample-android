@@ -6,7 +6,7 @@
     app:startDestination="@id/homeConfiguration">
     <fragment
         android:id="@+id/homeConfiguration"
-        android:name="com.nice.cxonechat.sample.HomeConfigurationFragment"
+        android:name="com.nice.cxonechat.sample.ui.config.HomeConfigurationFragment"
         tools:layout="@layout/fragment_home_configuration" >
         <action
             android:id="@+id/action_homeConfiguration_to_customConfigurationFragment"
@@ -16,7 +16,7 @@
     </fragment>
     <fragment
         android:id="@+id/customConfiguration"
-        android:name="com.nice.cxonechat.sample.CustomConfigurationFragment"
+        android:name="com.nice.cxonechat.sample.ui.config.CustomConfigurationFragment"
         tools:layout="@layout/fragment_custom_configuration" >
         <action
             android:id="@+id/action_customConfiguration_to_homeConfiguration"

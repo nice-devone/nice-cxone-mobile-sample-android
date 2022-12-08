@@ -2,6 +2,7 @@ package com.nice.cxonechat.sample
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph
 import androidx.navigation.fragment.NavHostFragment
@@ -9,13 +10,22 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.nice.cxonechat.sample.common.SampleAppBaseActivity
 import com.nice.cxonechat.sample.databinding.ActivityConfigurationBinding
-import com.nice.cxonechat.sample.service.PreferencesService
+import com.nice.cxonechat.sample.storage.ChatConfigurationStorage.getConfiguration
+import com.nice.cxonechat.sample.storage.EnvironmentStorage.getEnvironment
+import com.nice.cxonechat.sample.storage.ValueStorage
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class ConfigurationActivity : SampleAppBaseActivity() {
 
     private lateinit var binding: ActivityConfigurationBinding
     private lateinit var navController: NavController
     private lateinit var navGraph: NavGraph
+
+    @Inject
+    internal lateinit var valueStorage: ValueStorage
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,23 +33,22 @@ class ConfigurationActivity : SampleAppBaseActivity() {
         setContentView(binding.root)
 
         binding.toolbar.title = ""
-        if (PreferencesService.getConsumerId(this).isNotEmpty() &&
-            PreferencesService.getEnvironment(this).isNotEmpty()) {
-            val brandId = PreferencesService.getBrandId(this)
-            val channelId = PreferencesService.getChannelId(this)
 
-            val intent = Intent(this, HomeActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                putExtra(
-                    HomeConfigurationFragment.ENVIRONMENT_SELECTED,
-                    PreferencesService.getEnvironment(this@ConfigurationActivity)
-                )
-                if (brandId.isNotEmpty()) putExtra(CustomConfigurationFragment.BRAND_ID, brandId)
-                if (channelId.isNotEmpty()) putExtra(CustomConfigurationFragment.CHANNEL_ID, channelId)
+        finishUiSetupAsync()
+    }
+
+    private fun finishUiSetupAsync() {
+        lifecycleScope.launch {
+            val environment = valueStorage.getEnvironment()
+            val configuration = valueStorage.getConfiguration(environment)
+            if (configuration != null) {
+                val intent = Intent(this@ConfigurationActivity, LoginActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+                startActivity(intent)
+            } else {
+                initializeUI()
             }
-            startActivity(intent)
-        } else {
-            initializeUI()
         }
     }
 
