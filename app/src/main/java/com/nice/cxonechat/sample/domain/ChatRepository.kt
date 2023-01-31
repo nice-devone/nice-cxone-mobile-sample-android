@@ -12,11 +12,12 @@ import com.nice.cxonechat.sample.BuildConfig
 import com.nice.cxonechat.sample.storage.ChatConfigurationStorage.getConfiguration
 import com.nice.cxonechat.sample.storage.EnvironmentStorage.getEnvironment
 import com.nice.cxonechat.sample.storage.ValueStorage
-import com.nice.cxonechat.sample.storage.ValueStorage.StringKey.AUTH_TOKEN_KEY
-import com.nice.cxonechat.sample.storage.ValueStorage.StringKey.CODE_VERIFIER_KEY
+import com.nice.cxonechat.sample.storage.getAuthKey
+import com.nice.cxonechat.sample.storage.getCoveVerifier
+import com.nice.cxonechat.sample.storage.getCustomerCustomValues
+import com.nice.cxonechat.sample.storage.getUserFirstName
+import com.nice.cxonechat.sample.storage.getUserLastName
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -27,7 +28,6 @@ internal class ChatRepository @Inject constructor(
     @ApplicationContext val context: Context,
     private val valueStorage: ValueStorage,
 ) {
-
     @GuardedBy("this")
     @Volatile
     private var chat: Chat? = null
@@ -41,7 +41,15 @@ internal class ChatRepository @Inject constructor(
         // TODO add support for missing config
         val environment = valueStorage.getEnvironment()
         val socketFactoryConfiguration = requireNotNull(valueStorage.getConfiguration(environment))
-        val builder = with(ChatBuilder(context = context, config = socketFactoryConfiguration)) {
+        val builder: ChatBuilder = with(ChatBuilder(context = context, config = socketFactoryConfiguration)) {
+            val firstName = valueStorage.getUserFirstName()
+            val lastName = valueStorage.getUserLastName()
+            if (firstName != null && lastName != null) {
+                setUserName(
+                    first = firstName,
+                    last = lastName,
+                )
+            }
             authorization?.let(::setAuthorization)
             setDevelopmentMode(BuildConfig.DEBUG)
         }
@@ -49,7 +57,10 @@ internal class ChatRepository @Inject constructor(
         val token = Firebase.messaging.token
         if (token.isSuccessful) {
             newChat.setDeviceToken(token.result)
+        } else {
+            newChat.setDeviceToken("") // Temporary workaround for bug affecting StoreVisitor events
         }
+        newChat.customFields().add(valueStorage.getCustomerCustomValues())
         synchronized(this) {
             chat?.close()
             chat = newChat
@@ -73,12 +84,10 @@ internal class ChatRepository @Inject constructor(
     }
 
     private suspend inline fun createAuthorization(): Authorization? {
-        val code = valueStorage.getString(CODE_VERIFIER_KEY).firstNotBlankOrNull() ?: return null
-        val authToken = valueStorage.getString(AUTH_TOKEN_KEY).firstNotBlankOrNull() ?: return null
+        val code = valueStorage.getCoveVerifier() ?: return null
+        val authToken = valueStorage.getAuthKey() ?: return null
         return Authorization(code, authToken)
     }
-
-    private suspend inline fun Flow<String>.firstNotBlankOrNull(): String? = firstOrNull()?.takeIf(String::isNotBlank)
 
     private suspend fun ChatBuilder.awaitBuild(): Chat = suspendCancellableCoroutine { continuation ->
         val cancellable: Cancellable = build(continuation::resume)

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -24,8 +25,13 @@ import com.nice.cxonechat.sample.ThreadSelectedListener
 import com.nice.cxonechat.sample.callback.SwipeToDeleteCallback
 import com.nice.cxonechat.sample.databinding.CreateThreadDialogBinding
 import com.nice.cxonechat.sample.databinding.FragmentChatThreadsBinding
+import com.nice.cxonechat.sample.model.CreateThreadResult.Failure.GENERAL_FAILURE
+import com.nice.cxonechat.sample.model.CreateThreadResult.Failure.REASON_THREADS_REFRESH_REQUIRED
+import com.nice.cxonechat.sample.model.CreateThreadResult.Failure.REASON_THREAD_CREATION_FORBIDDEN
+import com.nice.cxonechat.sample.model.CreateThreadResult.Success
 import com.nice.cxonechat.sample.model.SpinnerOption
 import com.nice.cxonechat.sample.model.Thread
+import com.nice.cxonechat.sample.util.repeatOnViewOwnerLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -80,7 +86,6 @@ class ChatThreadsFragment : Fragment(), ThreadSelectedListener {
         updateAdapter(true)
         repeatOnViewOwnerLifecycle(State.STARTED) {
             viewModel.reportPageView()
-            viewModel.reportChatWindowOpen() // TODO check if this correct behavior
         }
         return onCreateBinding.root
     }
@@ -88,6 +93,11 @@ class ChatThreadsFragment : Fragment(), ThreadSelectedListener {
     override fun onDestroyView() {
         binding = null
         super.onDestroyView()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.refreshThreads()
     }
 
     private fun FloatingActionButton.setupFab() {
@@ -181,19 +191,42 @@ class ChatThreadsFragment : Fragment(), ThreadSelectedListener {
         dialog.show()
 
         cancelButton.setOnClickListener {
-            dialog.hide()
+            dialog.dismiss()
         }
+
         createThreadButton.setOnClickListener {
             val customContactFields = mutableMapOf(
                 "department" to selectedDepartment.name,
                 "location" to selectedLocation.name,
             )
             lifecycleScope.launch {
-                viewModel.createThread(customContactFields)
-                dialog.hide()
+                dialog.dismiss()
+                createThread(customContactFields)
+            }
+        }
+    }
+
+    private suspend fun createThread(customContactFields: MutableMap<String, String>) {
+        when (viewModel.createThread(customContactFields)) {
+            REASON_THREADS_REFRESH_REQUIRED -> showAlert(R.string.warning_threads_refresh_required)
+            REASON_THREAD_CREATION_FORBIDDEN -> showAlert(R.string.warning_thread_creation_forbidden)
+            GENERAL_FAILURE -> showAlert(R.string.warning_general_failure)
+            Success -> {
                 val destination = ChatThreadsFragmentDirections.actionChatThreadsFragmentToChat()
                 findNavController().navigate(destination)
             }
         }
+    }
+
+    private fun showAlert(@StringRes message: Int) {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle(R.string.information)
+        builder.setMessage(getString(message))
+
+        builder.setPositiveButton(R.string.ok) { dialog, _ ->
+            dialog.cancel()
+        }
+
+        builder.show()
     }
 }

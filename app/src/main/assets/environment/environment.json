@@ -1,0 +1,17 @@
+{
+  "configurations": [
+    {
+      "name": "🤖 Sales",
+      "environment": {
+        "name": "NA1",
+        "location": "North America",
+        "baseUrl": "https://channels-de-na1.niceincontact.com/",
+        "socketUrl": "wss://chat-gateway-de-na1.niceincontact.com",
+        "originHeader": "https://livechat-de-na1.niceincontact.com",
+        "chatUrl": "https://channels-de-na1.niceincontact.com/"
+      },
+      "brandId": 1386,
+      "channelId": "chat_71b74591-4659-4220-bb6b-4ad34f8078aa"
+    }
+  ]
+}

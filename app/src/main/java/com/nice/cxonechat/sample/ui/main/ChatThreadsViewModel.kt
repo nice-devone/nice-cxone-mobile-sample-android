@@ -1,30 +1,32 @@
 package com.nice.cxonechat.sample.ui.main
 
+import androidx.annotation.CheckResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nice.cxonechat.Chat
 import com.nice.cxonechat.ChatThreadHandler
-import com.nice.cxonechat.event.ChatWindowOpenEvent
 import com.nice.cxonechat.event.PageViewEvent
 import com.nice.cxonechat.event.thread.ArchiveThreadEvent
 import com.nice.cxonechat.sample.data.flow
 import com.nice.cxonechat.sample.domain.SelectedThreadRepository
+import com.nice.cxonechat.sample.model.CreateThreadResult
 import com.nice.cxonechat.sample.model.Thread
+import com.nice.cxonechat.sample.model.foldToCreateThreadResult
 import com.nice.cxonechat.sample.storage.ValueStorage
-import com.nice.cxonechat.sample.storage.ValueStorage.StringKey.FIRST_NAME_KEY
-import com.nice.cxonechat.sample.storage.ValueStorage.StringKey.LAST_NAME_KEY
+import com.nice.cxonechat.sample.storage.getCustomerCustomValues
 import com.nice.cxonechat.thread.ChatThread
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 internal class ChatThreadsViewModel @Inject constructor(
-    chat: Chat,
+    private val chat: Chat,
     private val selectedThreadRepository: SelectedThreadRepository,
     private val valueStorage: ValueStorage,
 ) : ViewModel() {
@@ -36,6 +38,7 @@ internal class ChatThreadsViewModel @Inject constructor(
 
     val threads: StateFlow<List<Thread>> = threadsHandler
         .flow
+        .conflate()
         .map { chatThreads ->
             chatThreads.map { chatThread ->
                 Thread(
@@ -48,7 +51,7 @@ internal class ChatThreadsViewModel @Inject constructor(
                 )
             }
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     fun archiveThread(thread: ChatThread) {
         threadsHandler.thread(thread).events().trigger(ArchiveThreadEvent)
@@ -58,20 +61,22 @@ internal class ChatThreadsViewModel @Inject constructor(
         selectedThreadRepository.chatThreadHandler = threadsHandler.thread(thread)
     }
 
-    suspend fun createThread(customContactFields: MutableMap<String, String>) {
-        customContactFields += "firstname" to valueStorage.getString(FIRST_NAME_KEY).first()
-        customContactFields += "lastnane" to valueStorage.getString(LAST_NAME_KEY).first()
-        val handler: ChatThreadHandler = threadsHandler.create()
-        handler.customFields().add(customContactFields)
-        selectedThreadRepository.chatThreadHandler = handler
+    @CheckResult
+    suspend fun createThread(customContactFields: MutableMap<String, String>): CreateThreadResult {
+        chat.customFields().add(valueStorage.getCustomerCustomValues())
+        return runCatching {
+            val handler: ChatThreadHandler = threadsHandler.create(customContactFields)
+            selectedThreadRepository.chatThreadHandler = handler
+        }.foldToCreateThreadResult()
     }
 
     fun reportPageView() {
         events.trigger(PageViewEvent("ChatThreadsView", "threads-view"))
     }
 
-    fun reportChatWindowOpen() {
-        events.trigger(ChatWindowOpenEvent)
+    fun refreshThreads() {
+        viewModelScope.launch {
+            threadsHandler.refresh()
+        }
     }
-
 }

@@ -5,7 +5,6 @@
     <ID>DataClassShouldBeImmutable:SpinnerOption.kt$SpinnerOption$var id: String</ID>
     <ID>DataClassShouldBeImmutable:SpinnerOption.kt$SpinnerOption$var name: String</ID>
     <ID>SpacingBetweenPackageAndImports:SwipeToDeleteCallback.kt$ </ID>
-    <ID>UndocumentedPublicClass:ChatThreadFragment.kt$ChatThreadFragment : FragmentInputListenerTypingListenerSelectionListenerOnLoadMoreListenerAttachmentsListener</ID>
     <ID>UndocumentedPublicClass:ChatThreadsFragment.kt$ChatThreadsFragment : FragmentThreadSelectedListener</ID>
     <ID>UndocumentedPublicClass:ConfigurationActivity.kt$ConfigurationActivity : SampleAppBaseActivity</ID>
     <ID>UndocumentedPublicClass:CustomConfigurationFragment.kt$CustomConfigurationFragment : Fragment</ID>
@@ -18,7 +17,6 @@
     <ID>UndocumentedPublicClass:Message.kt$AttachmentMessage : MessageImage</ID>
     <ID>UndocumentedPublicClass:Message.kt$Message : IMessage</ID>
     <ID>UndocumentedPublicClass:Message.kt$PluginMessage : MessageMessageContentType</ID>
-    <ID>UndocumentedPublicClass:Message.kt$PluginMessage$Content</ID>
     <ID>UndocumentedPublicClass:Message.kt$TextMessage : Message</ID>
     <ID>UndocumentedPublicClass:OutcomingTextAndButtonsMessageViewHolder.kt$OutcomingTextAndButtonsMessageViewHolder : OutcomingTextMessageViewHolder</ID>
     <ID>UndocumentedPublicClass:PKCE.kt$PKCEConstants</ID>
@@ -46,8 +44,6 @@
     <ID>UndocumentedPublicProperty:Message.kt$AttachmentMessage$val mimeType = attachment.mimeType</ID>
     <ID>UndocumentedPublicProperty:Message.kt$Message$val status: String = "Sent"</ID>
     <ID>UndocumentedPublicProperty:Message.kt$PluginMessage$val content: Content</ID>
-    <ID>UndocumentedPublicProperty:Message.kt$PluginMessage.Content$val elements: List&lt;PluginElement&gt;</ID>
-    <ID>UndocumentedPublicProperty:Message.kt$PluginMessage.Content$val postback: String?</ID>
     <ID>UndocumentedPublicProperty:PKCE.kt$PKCEConstants$const val BITS_IN_CHAR = 6</ID>
     <ID>UndocumentedPublicProperty:PKCE.kt$PKCEConstants$const val BITS_IN_OCTET = 8</ID>
     <ID>UndocumentedPublicProperty:PKCE.kt$PKCEConstants$const val MAX_CODE_VERIFIER_LENGTH = 128</ID>

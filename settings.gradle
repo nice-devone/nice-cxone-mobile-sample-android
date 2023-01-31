@@ -7,16 +7,26 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
+    def localProperties = new Properties()
+    try {
+        localProperties.load(file("local.properties").newReader())
+    } catch (ignored) {
+        logger.trace("Unable to read local.properties")
+    }
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' } //  Used only for ChatKit and PhotoView
         jcenter() // Warning: this repository is going to shut down soon - used only for `com.google.android:flexbox:1.0.0` which is used by ChatKit
-        // For future usage
+//        mavenLocal()
 //        maven {
 //            name = "github"
-//            url = "https://maven.pkg.github.com/nice-devone/nice-cxone-mobile-sdk-android"
+//            url = "https://maven.pkg.github.com/BrandEmbassy/cxone-mobile-sdk-android"
+//            credentials {
+//                username = localProperties["github.user"] ?: System.getenv("GPR_USERNAME")
+//                password = localProperties["github.key"] ?: System.getenv("GPR_TOKEN")
+//            }
 //        }
     }
 }

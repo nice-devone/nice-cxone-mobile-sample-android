@@ -16,17 +16,16 @@ import com.nice.cxonechat.event.ProactiveActionSuccessEvent
 import com.nice.cxonechat.event.thread.MarkThreadReadEvent
 import com.nice.cxonechat.event.thread.TypingStartEvent
 import com.nice.cxonechat.message.Attachment
-import com.nice.cxonechat.message.ContentDescriptor
 import com.nice.cxonechat.message.Message.Plugin
-import com.nice.cxonechat.message.MessageDirection.FromApp
-import com.nice.cxonechat.message.MessageDirection.ToApp
-import com.nice.cxonechat.sample.data.ImageContentDataSource
+import com.nice.cxonechat.message.MessageDirection.ToAgent
+import com.nice.cxonechat.message.MessageDirection.ToClient
+import com.nice.cxonechat.sample.data.ContentDataSourceList
 import com.nice.cxonechat.sample.data.flow
+import com.nice.cxonechat.sample.domain.PluginElementConvertor
 import com.nice.cxonechat.sample.domain.SelectedThreadRepository
 import com.nice.cxonechat.sample.model.AttachmentMessage
 import com.nice.cxonechat.sample.model.Message
 import com.nice.cxonechat.sample.model.PluginMessage
-import com.nice.cxonechat.sample.model.PluginMessage.Content
 import com.nice.cxonechat.sample.model.TextMessage
 import com.nice.cxonechat.sample.model.User
 import com.nice.cxonechat.sample.ui.main.ChatThreadViewModel.ChatMetadata.Companion.asMetadata
@@ -58,9 +57,10 @@ import com.nice.cxonechat.message.Message.Text as SdkTextMessage
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 internal class ChatThreadViewModel @Inject constructor(
-    private val imageContentDataSource: ImageContentDataSource,
+    private val contentDataSource: ContentDataSourceList,
     private val selectedThreadRepository: SelectedThreadRepository,
     private val chat: Chat,
+    private val pluginElementConvertor: PluginElementConvertor,
 ) : ViewModel() {
 
     private val isMultiThreadEnabled = chat.configuration.hasMultipleThreadsPerEndUser
@@ -133,30 +133,22 @@ internal class ChatThreadViewModel @Inject constructor(
 
     fun sendAttachment(message: String?, attachment: Uri) {
         viewModelScope.launch {
-            val content = imageContentDataSource.uriToImageContent(attachment) ?: return@launch
-            val fileName = "${UUID.randomUUID()}.jpg"
-            val mimeType = "image/jpg"
-            val sdkAttachment = ContentDescriptor(
-                content = content,
-                mimeType = mimeType,
-                fileName = fileName
-            )
+            val contentDescriptor = contentDataSource.descriptorForUri(attachment) ?: return@launch
             val appMessage: (UUID) -> Message = { id ->
                 AttachmentMessage(
                     id = id.toString(),
                     user = User(ChatThreadFragment.SENDER_ID, "Oscar"),
                     text = message.orEmpty(),
                     attachment = object : Attachment() {
-                        override val friendlyName: String = fileName
-                        override val mimeType: String = mimeType
+                        override val friendlyName: String = contentDescriptor.fileName ?: "unnamed"
+                        override val mimeType: String = contentDescriptor.mimeType ?: "application/octet-stream"
                         override val url: String = attachment.toString()
                     }
                 )
-
             }
             val listener = OnMessageSentListener(appMessage, sentMessagesFlow)
             messageHandler.send(
-                attachments = listOf(sdkAttachment),
+                attachments = listOf(contentDescriptor),
                 message = message.orEmpty(),
                 listener = listener,
             )
@@ -214,14 +206,14 @@ internal class ChatThreadViewModel @Inject constructor(
         return chatThread.messages.associate { sdkMessage ->
             val user = User(
                 id = when (sdkMessage.direction) {
-                    FromApp -> ChatThreadFragment.SENDER_ID
-                    ToApp -> "0"
+                    ToAgent -> ChatThreadFragment.SENDER_ID
+                    ToClient -> "0"
                 },
                 name = sdkMessage.author.name,
             )
             val status = when (sdkMessage.direction) {
-                ToApp -> "Read"
-                FromApp -> if (sdkMessage.metadata.readAt != null) "Read" else "Received"
+                ToClient -> "Read"
+                ToAgent -> if (sdkMessage.metadata.readAt != null) "Read" else "Received"
             }
             val uuid = sdkMessage.id.toString()
             val message = when (sdkMessage) {
@@ -246,9 +238,10 @@ internal class ChatThreadViewModel @Inject constructor(
                     }
                 }
                 is Plugin -> PluginMessage(
-                    uuid,
-                    user,
-                    content = Content(sdkMessage)
+                    id = uuid,
+                    user = user,
+                    createdAt = sdkMessage.createdAt,
+                    content = pluginElementConvertor.pluginToContent(sdkMessage)
                 )
             }
             message.id to message

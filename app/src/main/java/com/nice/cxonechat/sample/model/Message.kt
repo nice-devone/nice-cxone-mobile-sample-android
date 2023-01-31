@@ -1,8 +1,6 @@
 package com.nice.cxonechat.sample.model
 
 import com.nice.cxonechat.message.Attachment
-import com.nice.cxonechat.message.Message.Plugin
-import com.nice.cxonechat.message.PluginElement
 import com.stfalcon.chatkit.commons.models.IMessage
 import com.stfalcon.chatkit.commons.models.IUser
 import com.stfalcon.chatkit.commons.models.MessageContentType
@@ -66,11 +64,32 @@ class AttachmentMessage(
     createdAt: Date = Date(),
     status: String = "Sent",
     private val attachment: Attachment,
-) : Message(id, user, text.ifBlank { null } ?: attachment.friendlyName, createdAt, status), Image {
-
+) : Message(id, user, text.ifBlank { attachment.friendlyName }, createdAt, status), Image {
     val mimeType = attachment.mimeType
 
-    override fun getImageUrl(): String = attachment.url
+    /**
+     * The original attachment url, this should be used to access the actual
+     * attachment instead of [getImageUrl()] since that may be mangled to
+     * support placeholders.
+     */
+    val originalUrl = attachment.url
+
+    /**
+     * get the image url for the in message thumbnail.
+     *
+     * The original url for the real resource is separately cached in [originalUrl]
+     *
+     * @return returns the original url for images or videos or an android.resource
+     * url for the document place holder for any other mime type.
+      */
+    override fun getImageUrl(): String? = when {
+        /* a null url will result in an error preview displayed */
+        mimeType == null -> null
+        mimeType.startsWith("image/") -> attachment.url
+        mimeType.startsWith("video/") -> attachment.url
+        /* this will result in a document preview being displayed */
+        else -> "android.resource://com.nice.cxonechat.sample/drawable/document_48px"
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -99,12 +118,16 @@ class PluginMessage(
     status: String = "Sent",
     val content: Content,
 ) : Message(id, user, text, createdAt, status), MessageContentType {
+    /**
+     * Content of the plugin message as delivered by the SDK.
+     *
+     * @property postback The raw postback value, can be used as a fallback text or can be parsed to an object.
+     * @property element Optional [PluginModel], in case it is null the element type was unsupported by the SDK.
+     */
     data class Content(
         val postback: String?,
-        val elements: List<PluginElement>,
-    ) {
-        constructor(sdkMessage: Plugin) : this(sdkMessage.postback, sdkMessage.elements.toList())
-    }
+        val element: PluginModel?,
+    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

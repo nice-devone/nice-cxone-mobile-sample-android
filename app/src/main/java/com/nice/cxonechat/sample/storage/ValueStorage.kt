@@ -60,6 +60,7 @@ internal class ValueStorage @Inject constructor(
         private const val PREF_BRAND_ID: String = "share_brand_id"
         private const val PREF_FIRST_NAME: String = "share_first_name"
         private const val PREF_LAST_NAME: String = "share_last_name"
+        private const val PREF_CUSTOM_VALUES: String = "share_custom_values_serialized"
     }
 
     enum class StringKey(val value: Key<String>) {
@@ -70,6 +71,8 @@ internal class ValueStorage @Inject constructor(
         CHANNEL_ID_KEY(stringPreferencesKey(PREF_CHANNEL_ID)),
         BRAND_ID_KEY(stringPreferencesKey(PREF_BRAND_ID)),
         FIRST_NAME_KEY(stringPreferencesKey(PREF_FIRST_NAME)),
-        LAST_NAME_KEY(stringPreferencesKey(PREF_LAST_NAME));
+        LAST_NAME_KEY(stringPreferencesKey(PREF_LAST_NAME)),
+        CUSTOMER_CUSTOM_VALUES_KEY(stringPreferencesKey(PREF_CUSTOM_VALUES))
+        ;
     }
 }
