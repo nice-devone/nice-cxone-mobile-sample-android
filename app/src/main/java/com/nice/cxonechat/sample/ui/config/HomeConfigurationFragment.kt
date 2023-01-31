@@ -9,30 +9,26 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog.Builder
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import com.nice.cxonechat.SocketFactoryConfiguration
-import com.nice.cxonechat.enums.CXOneEnvironment.NA1
 import com.nice.cxonechat.sample.LoginActivity
 import com.nice.cxonechat.sample.R.layout
 import com.nice.cxonechat.sample.R.string
 import com.nice.cxonechat.sample.databinding.FragmentHomeConfigurationBinding
-import com.nice.cxonechat.sample.storage.ChatConfigurationStorage.setConfiguration
-import com.nice.cxonechat.sample.storage.ValueStorage
-import com.nice.cxonechat.sample.ui.config.CustomEnvironments.EU_QA1
+import com.nice.cxonechat.sample.storage.SdkConfiguration
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeConfigurationFragment : Fragment() {
     private var _binding: FragmentHomeConfigurationBinding? = null
     private val binding get() = _binding!!
-    private var environmentSelected = "CD"
+    private var environmentSelected: SdkConfiguration? = null
     private lateinit var dialog: ProgressDialog
 
-    @Inject
-    internal lateinit var valueStorage: ValueStorage
+    private val viewModel: HomeConfigurationViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,42 +46,44 @@ class HomeConfigurationFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val configurationAdapter = ArrayAdapter(
-            requireContext(),
-            layout.dropdown_item,
-            listOf("CD", "M&J", "Sales")
-        )
-
+        setupConfigurationAdapter()
         with(binding) {
-            configurationAutoCompleteTextView.setAdapter(configurationAdapter)
-            configurationAutoCompleteTextView.setText("CD", false)
-            configurationAutoCompleteTextView.setOnItemClickListener { _, _, index, _ ->
-                environmentSelected = configurationAdapter.getItem(index).orEmpty()
-            }
-
-            continueButton.setOnClickListener {
-                if (environmentSelected.isBlank()) {
-                    showAlert(getString(string.select_valid_configuration))
-                } else {
-                    val configuration = when (environmentSelected) {
-                        "M&J" -> SocketFactoryConfiguration(
-                            environment = EU_QA1,
-                            brandId = 6427,
-                            channelId = "chat_cac453c1-7651-4d10-abba-c4a426d932ff"
-                        )
-                        else -> SocketFactoryConfiguration(
-                            environment = NA1.value,
-                            brandId = 1386,
-                            channelId = "chat_71b74591-4659-4220-bb6b-4ad34f8078aa",
-                        )
-                    }
-                    storeConfigAndShowLogin(configuration)
-                }
-            }
-
             useCustomConfigurationTextView.setOnClickListener {
                 val action = HomeConfigurationFragmentDirections.actionHomeConfigurationToCustomConfigurationFragment()
                 view.findNavController().navigate(action)
+            }
+        }
+    }
+
+    private fun setupConfigurationAdapter() = lifecycleScope.launch {
+        val configurations = viewModel.getAssetConfigurations()
+            ?.takeIf { it.configurations.isNotEmpty() }
+            ?: return@launch
+        val configurationMap = configurations.configurations.associateBy { it.name }
+        val configurationNames = configurationMap.keys.toList()
+        val configurationAdapter = ArrayAdapter(
+            requireContext(),
+            layout.dropdown_item,
+            configurationNames
+        )
+        val firstConfiguration = configurationNames.first()
+        // Preselect first for convenience
+        environmentSelected = configurationMap[firstConfiguration]
+        with(binding) {
+            configurationAutoCompleteTextView.setAdapter(configurationAdapter)
+            configurationAutoCompleteTextView.setText(firstConfiguration, false)
+            configurationAutoCompleteTextView.setOnItemClickListener { _, _, index, _ ->
+                environmentSelected = configurationMap[configurationAdapter.getItem(index)]
+            }
+
+            continueButton.setOnClickListener {
+                val selected = environmentSelected
+                if (selected == null) {
+                    showAlert(getString(string.select_valid_configuration))
+                } else {
+                    val configuration = selected.toSocketFactoryConfiguration()
+                    storeConfigAndShowLogin(configuration)
+                }
             }
         }
     }
@@ -129,7 +127,7 @@ class HomeConfigurationFragment : Fragment() {
     private fun storeConfigAndShowLogin(configuration: SocketFactoryConfiguration) {
         lifecycleScope.launch {
             showDialog()
-            valueStorage.setConfiguration(configuration)
+            viewModel.setConfiguration(configuration)
             hideDialog()
             showLogin()
         }

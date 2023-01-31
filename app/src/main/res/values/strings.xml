@@ -17,6 +17,7 @@
     <string name="new_message_received">New message received</string>
     <string name="socket_disconnected">Socket disconnected</string>
     <string name="configuration">Configuration</string>
+    <string name="selected_configuration">Selected configuration</string>
     <string name="use_a_custom_configuration">Use a custom configuration</string>
     <string name="continue_text">Continue</string>
     <string name="environment">Environment</string>
@@ -28,10 +29,40 @@
     <string name="deep_link_description">This is an example of a deep link! You can link to any other view in your app by sending a deep link plugin message using the CXone Chat SDK.</string>
     <string name="deep_link">Deep Link</string>
     <string name="detail_hint_prefix">Enter your %1$s</string>
-    <string name="thread_topic_hint">Enter conversation topic</string>
+    <string name="extra_info_hint">Enter extra information</string>
     <string name="email">e-mail</string>
     <string name="change_details_label">Change custom fields</string>
     <string name="dsc_create_thread">Create thread</string>
     <string name="btn_label_current">Current</string>
     <string name="btn_label_archived">Archived</string>
+
+    <string name="unsupported_type_title">Unsupported Document Type</string>
+    <string name="unsupported_type_message">You do not have a viewer for documents of type %1$s installed. Visit the google play store for options.</string>
+
+    <string name="attachment_picker_title">Select Attachment</string>
+    <string name="fieldname_blank">%1$s can\'t be blank</string>
+    <string name="creating_thread">Creating thread, please wait.</string>
+
+    <string name="permission_requested">Permission Requested</string>
+    <string name="notifications_rationale">SDK Demo would like to send you notifications if your agent sends you messages when the application is suspended.</string>
+    <string name="no_notifications_title">Notifications Unavailable</string>
+    <string name="no_notifications_message">SDK Demo can not send you notifications if your agent sends you messages when the application is suspended.</string>
+    <string name="notification_channel_title">Channel human readable title</string>
+
+    <string name="message_plugin_custom_fallback_text_label">Fallback text: %1$s</string>
+
+    <string-array name="attachment_type_labels">
+        <item>Pick Image</item>
+        <item>Pick Video</item>
+        <item>Pick PDF Document</item>
+    </string-array>
+    <string-array name="attachment_type_mimetypes">
+        <item>image/*</item>
+        <item>video/*</item>
+        <item>application/pdf</item>
+    </string-array>
+
+    <string name="warning_thread_creation_forbidden">Chat configuration only allows usage of one thread. Please use existing thread to continue.</string>
+    <string name="warning_threads_refresh_required">Please refresh the thread list before attempting to create thread.</string>
+    <string name="warning_general_failure">Unable to finish action, due to the unhandled exception. Please check log for details and/or report the issue.</string>
 </resources>

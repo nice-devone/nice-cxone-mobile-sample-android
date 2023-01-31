@@ -1,8 +1,15 @@
 package com.nice.cxonechat.sample.ui.main
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,10 +17,21 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import android.widget.Toolbar
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.contract.ActivityResultContracts.GetContent
+import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.annotation.StringRes
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
@@ -25,27 +43,33 @@ import com.nice.cxonechat.sample.custom.holders.IncomingTextAndButtonsMessageVie
 import com.nice.cxonechat.sample.custom.holders.OutcomingTextAndButtonsMessageViewHolder
 import com.nice.cxonechat.sample.databinding.CustomSnackBarBinding
 import com.nice.cxonechat.sample.databinding.FragmentChatThreadBinding
+import com.nice.cxonechat.sample.domain.AttachmentSharingRepository
 import com.nice.cxonechat.sample.model.AttachmentMessage
 import com.nice.cxonechat.sample.model.Message
 import com.nice.cxonechat.sample.model.PluginMessage
 import com.nice.cxonechat.sample.ui.main.ChatThreadViewModel.OnPopupActionState.ReceivedOnPopupAction
 import com.nice.cxonechat.sample.ui.main.ChatThreadViewModel.ReportOnPopupAction.FAILURE
 import com.nice.cxonechat.sample.ui.main.ChatThreadViewModel.ReportOnPopupAction.SUCCESS
+import com.nice.cxonechat.sample.util.dpToPixels
+import com.nice.cxonechat.sample.util.repeatOnViewOwnerLifecycle
 import com.stfalcon.chatkit.commons.ImageLoader
 import com.stfalcon.chatkit.messages.MessageHolders
 import com.stfalcon.chatkit.messages.MessageInput
 import com.stfalcon.chatkit.messages.MessagesListAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import org.json.JSONTokener
-import java.util.*
+import javax.inject.Inject
 
+/**
+ * Fragment presenting UI of one concrete chat thread (conversation).
+ */
 @AndroidEntryPoint
 class ChatThreadFragment : Fragment(),
     MessageInput.InputListener,
     MessageInput.TypingListener,
-    MessagesListAdapter.SelectionListener,
     MessagesListAdapter.OnLoadMoreListener,
     MessageInput.AttachmentsListener {
 
@@ -56,6 +80,25 @@ class ChatThreadFragment : Fragment(),
     private val viewModel: ChatThreadViewModel by viewModels()
 
     private var fragmentBinding: FragmentChatThreadBinding? = null
+
+    private val activityLauncher by lazy {
+        ActivityLauncher(requireActivity().activityResultRegistry)
+            .also(lifecycle::addObserver)
+    }
+
+    @Inject
+    internal lateinit var attachmentSharingRepository: AttachmentSharingRepository
+
+    private val requestPermissionLauncher: ActivityResultLauncher<String> =
+        registerForActivityResult(RequestPermission()) { isGranted ->
+            if (!isGranted) {
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.no_notifications_title)
+                    .setMessage(R.string.no_notifications_message)
+                    .setNeutralButton(R.string.ok, null)
+                    .show()
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -72,6 +115,44 @@ class ChatThreadFragment : Fragment(),
         registerMessageListener()
         container?.findViewById<Toolbar>(R.id.toolbar)
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            checkNotificationPermissions(
+                Manifest.permission.POST_NOTIFICATIONS,
+                R.string.notifications_rationale
+            )
+        }
+        activityLauncher // activity launcher has to self-register before onStart
+    }
+
+    private fun checkNotificationPermissions(permission: String, @StringRes rationale: Int) {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                permission
+            ) == PackageManager.PERMISSION_GRANTED -> Unit
+
+            shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) ->
+                showRationale(permission, rationale)
+
+            else ->
+                requestPermissionLauncher.launch(permission)
+        }
+    }
+
+    private fun showRationale(permission: String, @StringRes rationale: Int) {
+        AlertDialog.Builder(requireContext())
+            .setTitle(getString(R.string.permission_requested))
+            .setMessage(rationale)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                requestPermissionLauncher.launch(permission)
+            }
+            .show()
     }
 
     private fun registerOnPopupActionListener() {
@@ -125,19 +206,53 @@ class ChatThreadFragment : Fragment(),
         }
     }
 
+    private fun Context.getDrawableResource(uri: String) =
+        if(uri.startsWith("android.resource://")) {
+            getDrawable(uri.substringAfterLast("/"))
+        } else {
+            null
+        }
+
+    @SuppressLint("DiscouragedApi")
+    private fun Context.getDrawable(named: String): Drawable? {
+        val id = resources.getIdentifier(named, "drawable", packageName)
+
+        return if(id == Resources.ID_NULL) {
+            null
+        } else {
+            AppCompatResources.getDrawable(
+                this,
+                id,
+            )
+        }
+    }
+
     private fun initAdapter(binding: FragmentChatThreadBinding) {
         val imageLoader = ImageLoader { imageView: ImageView, url: String?, _: Any? ->
-            Glide.with(this)
-                .load(url)
-                .into(imageView)
+            val safeUrl = url ?: return@ImageLoader
+            val context = context ?: return@ImageLoader
+            val thumbnailSize = context.dpToPixels(240f).toInt()
+            val image = context.getDrawableResource(safeUrl)
+
+            if(image != null) {
+                imageView.setImageDrawable(image)
+            } else {
+                Glide.with(this)
+                    .load(safeUrl)
+                    .override(thumbnailSize)
+                    .placeholder(R.drawable.downloading_48px)
+                    .fallback(R.drawable.document_48px)
+                    .error(R.drawable.error_48px)
+                    .into(imageView)
+            }
         }
         val holders = MessageHolders()
             .registerContentType(
                 CONTENT_TYPE_PLUGIN_BUTTON,
                 IncomingTextAndButtonsMessageViewHolder::class.java,
-                R.layout.item_custom_incoming_text_and_buttons_message,
+                R.layout.item_custom_plugin_message,
                 OutcomingTextAndButtonsMessageViewHolder::class.java,
-                R.layout.item_custom_outcoming_text_and_buttons_message
+                R.layout.item_custom_plugin_message
             ) { message, type ->
                 if (type != CONTENT_TYPE_PLUGIN_BUTTON) false else message is PluginMessage
             }
@@ -147,19 +262,55 @@ class ChatThreadFragment : Fragment(),
 
         val adapter = MessagesListAdapter<Message>(SENDER_ID, holders, imageLoader)
         messagesAdapter = adapter
-        adapter.enableSelectionMode(this)
         adapter.setLoadMoreListener(this)
         adapter.setOnMessageClickListener { message ->
             if (message !is AttachmentMessage) return@setOnMessageClickListener
-            val url = message.imageUrl
+            val url = message.originalUrl
             val mimeType = message.mimeType.orEmpty()
             val directions = when {
+                mimeType.startsWith("image/") -> ChatThreadFragmentDirections.actionChatThreadFragmentToImagePreviewActivity(url)
                 mimeType.startsWith("video/") -> ChatThreadFragmentDirections.actionChatThreadFragmentToVideoPreviewActivity(url)
-                else -> ChatThreadFragmentDirections.actionChatThreadFragmentToImagePreviewActivity(url)
-            }
+                else -> {
+                    openWithAndroid(message)
+                    null
+                }
+            } ?: return@setOnMessageClickListener
             findNavController().navigate(directions)
         }
+        adapter.setOnMessageLongClickListener(::onMessageLongClick)
         binding.messagesList.setAdapter(adapter)
+    }
+
+
+    private fun onMessageLongClick(message: Message) {
+        if (message !is AttachmentMessage) return
+        val context = context ?: return
+        lifecycleScope.launch {
+            val intent = attachmentSharingRepository.createSharingIntent(message, context)
+            if (intent == null) {
+                Toast.makeText(requireContext(), "Unable to store attachment for sharing, please try again later", Toast.LENGTH_SHORT).show()
+            } else {
+                startActivity(Intent.createChooser(intent, null))
+            }
+        }
+    }
+
+    private fun openWithAndroid(message: AttachmentMessage) {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(Uri.parse(message.originalUrl), message.mimeType)
+        }
+        val context = context ?: return
+        val packageManager = context.packageManager
+
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        } else {
+            AlertDialog.Builder(context)
+                .setTitle(R.string.unsupported_type_title)
+                .setMessage(getString(R.string.unsupported_type_message, message.mimeType))
+                .setNegativeButton(R.string.cancel, null)
+                .show()
+        }
     }
 
     override fun onResume() {
@@ -196,27 +347,25 @@ class ChatThreadFragment : Fragment(),
         viewModel.reportTypingEnd()
     }
 
-    override fun onSelectionChanged(count: Int) {
-        // No-op
-    }
-
     override fun onLoadMore(page: Int, totalItemsCount: Int) {
         viewModel.loadMore()
     }
 
     override fun onAddAttachments() {
-        val photoPickerIntent = Intent(Intent.ACTION_GET_CONTENT)
-        photoPickerIntent.type = "image/*"
-        startActivityForResult(photoPickerIntent, 1)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == AppCompatActivity.RESULT_OK && data != null) {
-            val chosenImageUri: Uri = data.data ?: return
-            viewModel.sendAttachment(null, chosenImageUri)
-        }
+        AlertDialog.Builder(context ?: return)
+            .setTitle(getString(R.string.attachment_picker_title))
+            .setSingleChoiceItems(
+                R.array.attachment_type_labels,
+                -1
+            ) { dialog, which ->
+                resources
+                    .getStringArray(R.array.attachment_type_mimetypes)
+                    .getOrNull(which)
+                    ?.let(activityLauncher::getContent)
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     private fun showSnackBar(data: SnackbarSetupData) {
@@ -266,9 +415,44 @@ class ChatThreadFragment : Fragment(),
         val action: ReceivedOnPopupAction,
     )
 
-
     companion object {
         internal const val SENDER_ID = "1"
         private const val CONTENT_TYPE_PLUGIN_BUTTON: Byte = 1
+    }
+
+    /**
+     * [LifecycleObserver][androidx.lifecycle.LifecycleObserver] intended to interface between the [ChatThreadFragment]
+     * and document picker activities to pick attachments.  This is now the recommended method for calling the document
+     * picker to fetch an image, video, or other document.
+     *
+     * At some point this could be expanded to support
+     * [TakePicture][androidx.activity.result.contract.ActivityResultContracts.TakePicture] and friends.
+     */
+    inner class ActivityLauncher(
+        private val registry: ActivityResultRegistry
+    ) : DefaultLifecycleObserver {
+        private var getContent: ActivityResultLauncher<String>? = null
+
+        override fun onCreate(owner: LifecycleOwner) {
+            getContent = registry.register("key", owner, GetContent()) { uri ->
+                val safeUri = uri ?: return@register
+
+                viewModel.sendAttachment(null, safeUri)
+            }
+        }
+
+        /**
+         * start a foreign activity to find an attachment with the indicated mime type
+         *
+         * [mimeType] is one of the strings contained in the string-array resource
+         * attachment_type_mimetypes.
+         *
+         * Note that this will work for finding existing resources, but not for opening
+         * the camera for photos or videos.
+         *
+         * @param mimeType attachment type to find.
+         *
+         */
+        fun getContent(mimeType: String) = getContent?.launch(mimeType)
     }
 }

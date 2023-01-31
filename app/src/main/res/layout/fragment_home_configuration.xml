@@ -27,7 +27,8 @@
             android:id="@+id/configurationAutoCompleteTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:editable="false"/>
+            android:hint="@string/selected_configuration"
+            android:inputType="none" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <androidx.appcompat.widget.AppCompatTextView

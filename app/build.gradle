@@ -24,6 +24,8 @@ android {
         applicationId "com.nice.cxonechat.sample"
         versionCode 1
         versionName "1.0"
+
+        vectorDrawables.useSupportLibrary = true
     }
 
     buildTypes {
@@ -47,11 +49,16 @@ dependencies {
     implementation 'com.google.android.material:material:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'com.ouattararomuald:slider:3.0.1'
-    implementation 'com.google.android.gms:play-services-auth:20.3.0'
-    implementation 'com.google.code.gson:gson:2.10'
+    implementation 'com.google.android.gms:play-services-auth:20.4.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
+
+    // Workaround for emulators having an issue downloading the font
+    def emojiVersion = "1.2.0"
+    implementation "androidx.emoji2:emoji2:$emojiVersion"
+    implementation "androidx.emoji2:emoji2-bundled:$emojiVersion"
 
     def glideVersion = "4.14.2"
     implementation "com.github.bumptech.glide:glide:$glideVersion"
@@ -72,15 +79,28 @@ dependencies {
     implementation "androidx.datastore:datastore-preferences:1.0.0"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
 
-    implementation("com.google.dagger:hilt-android:2.44")
-    kapt("com.google.dagger:hilt-android-compiler:2.44")
+    implementation("com.google.dagger:hilt-android:$daggerHiltVersion")
+    kapt("com.google.dagger:hilt-android-compiler:$daggerHiltVersion")
+
+    implementation "com.squareup.okio:okio:3.2.0"
+    implementation "com.squareup.okhttp3:okhttp:4.10.0"
+
+    def markwonVersion = "4.6.2"
+    implementation "io.noties.markwon:core:${markwonVersion}"
+    implementation "io.noties.markwon:html:${markwonVersion}"
+    implementation "io.noties.markwon:linkify:${markwonVersion}"
+    implementation "io.noties.markwon:image-glide:${markwonVersion}"
 
     implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
+
     // CXOne Chat SDK
-    // For future usage
-    //    implementation('com.nice.cxone:chat-core:main-SNAPSHOT') {
-    //        changing = true
-    //    }
+//    def cxOneVersion = project.properties["CXOneVersion"] ?: "main-SNAPSHOT"
+//    releaseImplementation("com.nice.cxone:chat-core:$cxOneVersion") {
+//        changing = true
+//    }
+//    debugImplementation("com.nice.cxone:chat-core-debug:$cxOneVersion") {
+//        changing = true
+//    }
     // Enable these dependencies if you want to use CxOne chat dependency as aar file
     implementation 'com.neovisionaries:nv-websocket-client:2.14'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'

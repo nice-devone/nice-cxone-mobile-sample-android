@@ -40,6 +40,6 @@ internal data class Environment(
             chatUrl = chatUrl,
         )
 
-        private fun Environment.toSdkEnvironment() = this
+        fun Environment.toSdkEnvironment() = this
     }
 }

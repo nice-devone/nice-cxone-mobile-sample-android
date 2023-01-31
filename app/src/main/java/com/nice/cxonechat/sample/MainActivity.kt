@@ -12,7 +12,6 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.get
@@ -22,6 +21,10 @@ import androidx.navigation.fragment.NavHostFragment
 import com.nice.cxonechat.sample.databinding.ActivityMainBinding
 import com.nice.cxonechat.sample.databinding.CreateCustomerDialogBinding
 import com.nice.cxonechat.sample.databinding.CreateThreadDialogBinding
+import com.nice.cxonechat.sample.model.CreateThreadResult.Failure.GENERAL_FAILURE
+import com.nice.cxonechat.sample.model.CreateThreadResult.Failure.REASON_THREADS_REFRESH_REQUIRED
+import com.nice.cxonechat.sample.model.CreateThreadResult.Failure.REASON_THREAD_CREATION_FORBIDDEN
+import com.nice.cxonechat.sample.model.CreateThreadResult.Success
 import com.nice.cxonechat.sample.model.SpinnerOption
 import com.nice.cxonechat.sample.ui.main.ChatViewModel
 import com.nice.cxonechat.sample.ui.main.UserDetails
@@ -81,6 +84,12 @@ class MainActivity : AppCompatActivity(),
         controller.addOnDestinationChangedListener { _, _, _ -> invalidateOptionsMenu() }
     }
 
+    override fun onResume() {
+        super.onResume()
+        chatViewModel.reportStoreVisitor()
+        chatViewModel.reportChatWindowOpen()
+    }
+
 //    @Deprecated("Deprecated in Java")
 //    override fun onBackPressed() {
 //        // Don't allow navigating back if there is only a single thread
@@ -127,7 +136,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun showEditThreadNameDialog() {
-        val builder = Builder(this)
+        val builder = AlertDialog.Builder(this)
         builder.setTitle("Update thread name")
 
         val threadNameEditText = EditText(this)
@@ -138,12 +147,12 @@ class MainActivity : AppCompatActivity(),
         layout.addView(threadNameEditText)
         builder.setView(layout)
 
-        builder.setPositiveButton("Ok") { dialog, _ ->
+        builder.setPositiveButton(R.string.ok) { dialog, _ ->
             chatViewModel.setThreadName(threadNameEditText.text.toString())
             dialog.dismiss()
         }
 
-        builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+        builder.setNegativeButton(R.string.cancel) { dialog, _ -> dialog.cancel() }
         builder.show()
     }
 
@@ -156,56 +165,59 @@ class MainActivity : AppCompatActivity(),
             val userDetails = chatViewModel.getUserDetails()
             val firstNameEditText = EditText(context)
             firstNameEditText.setText(userDetails.firstName)
-            firstNameEditText.hint = resources.getString(
+            firstNameEditText.hint = getString(
                 R.string.detail_hint_prefix,
-                resources.getString(R.string.first_name).lowercase(),
+                getString(R.string.first_name).lowercase(),
             )
 
             val lastNameEditText = EditText(context)
             lastNameEditText.setText(userDetails.lastName)
-            lastNameEditText.hint = resources.getString(
+            lastNameEditText.hint = getString(
                 R.string.detail_hint_prefix,
-                resources.getString(R.string.last_name).lowercase(),
+                getString(R.string.last_name).lowercase(),
             )
 
             val emailEditText = EditText(context)
-            emailEditText.hint = resources.getString(
+            emailEditText.hint = getString(
                 R.string.detail_hint_prefix,
-                resources.getString(R.string.email).lowercase(),
+                getString(R.string.email).lowercase(),
             )
 
-            val threadTopicEditText = EditText(context)
-            threadTopicEditText.hint = resources.getString(R.string.thread_topic_hint)
+            val extraInfoEditText = EditText(context)
+            extraInfoEditText.setHint(R.string.extra_info_hint)
 
             val layout = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
                 addView(firstNameEditText)
                 addView(lastNameEditText)
                 addView(emailEditText)
-                addView(threadTopicEditText)
+                addView(extraInfoEditText)
             }
 
-            val builder = with(Builder(context)) {
-                setTitle(resources.getString(R.string.change_details_label))
-                setView(layout)
-            }
+            val builder = AlertDialog.Builder(context)
+                .setTitle(R.string.change_details_label)
+                .setView(layout)
 
-            builder.setPositiveButton(resources.getString(R.string.ok)) { dialog, _ ->
+            builder.setPositiveButton(R.string.ok) { dialog, _ ->
                 val firstName = firstNameEditText.text.toString()
                 val lastName = lastNameEditText.text.toString()
                 val email = emailEditText.text.toString()
-                val threadTopic = threadTopicEditText.text.toString()
+                val extraInfo = extraInfoEditText.text.toString()
 
                 val customFields = mutableMapOf<String, String>()
                 val contactCustomFields = mutableMapOf<String, String>()
 
                 if (firstName.isBlank()) {
-                    showAlert("Firstname can't be blank")
+                    showAlert(
+                        getString(R.string.fieldname_blank, getString(R.string.first_name))
+                    )
                     return@setPositiveButton
                 }
 
                 if (lastName.isBlank()) {
-                    showAlert("Lastname can't be blank")
+                    showAlert(
+                        getString(R.string.fieldname_blank, getString(R.string.last_name))
+                    )
                     return@setPositiveButton
                 }
 
@@ -213,8 +225,8 @@ class MainActivity : AppCompatActivity(),
                     customFields += "email" to email
                 }
 
-                if (threadTopic.isNotEmpty()) {
-                    contactCustomFields += "request_type" to threadTopic
+                if (extraInfo.isNotEmpty()) {
+                    contactCustomFields += "request_type" to extraInfo
                 }
 
                 val newUserDetails = UserDetails(
@@ -227,15 +239,16 @@ class MainActivity : AppCompatActivity(),
                 }
             }
 
-            builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+            builder.setNegativeButton(R.string.cancel) { dialog, _ -> dialog.cancel() }
             builder.show()
         }
     }
 
+    // TODO move this to initial configuration together with Login
     private fun showInitialDialog() {
         val builder = AlertDialog.Builder(this)
-        builder.setTitle(getString(R.string.enter_your_details))
-        builder.setCancelable(false)
+            .setTitle(R.string.enter_your_details)
+            .setCancelable(false)
 
         val binding = CreateCustomerDialogBinding.inflate(layoutInflater, null, false)
         builder.setView(binding.root)
@@ -268,10 +281,10 @@ class MainActivity : AppCompatActivity(),
     private fun showAlert(message: String) {
         runOnUiThread {
             val builder = AlertDialog.Builder(this)
-            builder.setTitle(getString(R.string.information))
+            builder.setTitle(R.string.information)
             builder.setMessage(message)
 
-            builder.setPositiveButton(getString(R.string.ok)) { dialog, _ ->
+            builder.setPositiveButton(R.string.ok) { dialog, _ ->
                 dialog.cancel()
             }
 
@@ -281,10 +294,10 @@ class MainActivity : AppCompatActivity(),
 
     private fun openCreateThreadDialog() {
         // TODO refactor
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Creating thread, please wait.")
         val dialogLayout = CreateThreadDialogBinding.inflate(layoutInflater)
-        builder.setView(dialogLayout.root)
+        val builder = AlertDialog.Builder(this)
+            .setTitle(R.string.creating_thread)
+            .setView(dialogLayout.root)
 
         val locationSpinner = dialogLayout.locationSpinner
         val departmentSpinner = dialogLayout.departmentSpinner
@@ -353,10 +366,17 @@ class MainActivity : AppCompatActivity(),
                 "department" to selectedDepartment.name,
                 "location" to selectedLocation.name,
             )
-
-            chatViewModel.createThread(customContactFields)
             dialog.dismiss()
-            startFragmentNavigation()
+            createThread(customContactFields)
+        }
+    }
+
+    private fun createThread(customContactFields: MutableMap<String, String>) {
+        when (chatViewModel.createThread(customContactFields)) {
+            REASON_THREADS_REFRESH_REQUIRED -> showAlert(getString(R.string.warning_threads_refresh_required))
+            REASON_THREAD_CREATION_FORBIDDEN -> showAlert(getString(R.string.warning_thread_creation_forbidden))
+            GENERAL_FAILURE -> showAlert(getString(R.string.warning_general_failure))
+            Success -> startFragmentNavigation()
         }
     }
 }

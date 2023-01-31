@@ -11,3 +11,16 @@ detekt {
 dependencies {
     detektPlugins "io.gitlab.arturbosch.detekt:detekt-formatting:1.21.0"
 }
+
+android {
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+
+    lintOptions {
+        // if true, stop the gradle build if errors are found
+        abortOnError true
+        // if true, check all issues, including those that are off by default
+        checkAllWarnings true
+    }
+}
